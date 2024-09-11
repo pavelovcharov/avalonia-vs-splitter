@@ -75,15 +75,28 @@ public class SplitterLengthConverter : TypeConverter
         throw this.GetConvertToException(value, destinationType);
     }
 
+    private const string StarStr = "*";
     internal static SplitterLength FromString(string s, CultureInfo cultureInfo)
     {
         string str = s.Trim();
         double num = 1.0;
         SplitterUnitType unitType = SplitterUnitType.Stretch;
-        if (str == "*")
+        if (str.EndsWith(StarStr))
+        {
             unitType = SplitterUnitType.Fill;
+            var unitTypeLength = StarStr.Length;
+            if(str.Length == unitTypeLength)
+                num = 1;
+            else {
+                var valueStr = str.Substring(0, str.Length - unitTypeLength);
+                num = Convert.ToDouble(valueStr, (IFormatProvider)cultureInfo);
+            }
+        }
         else
-            num = Convert.ToDouble(str, (IFormatProvider) cultureInfo);
+        {
+            num = Convert.ToDouble(str, (IFormatProvider)cultureInfo);
+        }
+
         return new SplitterLength(num, unitType);
     }
 
