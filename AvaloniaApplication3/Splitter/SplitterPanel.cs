@@ -5,7 +5,11 @@ using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Reactive;
+using Avalonia.VisualTree;
 
 namespace AvaloniaApplication3;
 
@@ -52,6 +56,11 @@ public class SplitterPanel : Panel
 
     public SplitterPanel()
     {
+        Thumb.DragStartedEvent.Raised.Subscribe(new AnonymousObserver<(object, RoutedEventArgs)>(x =>
+        {
+            _ = x;
+            this.OnSplitterDragStarted(x.Item1, (VectorEventArgs)x.Item2);
+        }));
         // this.AddHandler(Thumb.DragStartedEvent, (Delegate) new DragStartedEventHandler(this.OnSplitterDragStarted));
         // AutomationProperties.SetAutomationId((DependencyObject) this, nameof (SplitterPanel));
     }
@@ -375,58 +384,58 @@ public class SplitterPanel : Panel
         return finalSize;
     }
 
-    // private void OnSplitterDragStarted(object sender, DragStartedEventArgs args)
-    // {
-    //     if (!(args.OriginalSource is SplitterGrip originalSource))
-    //         return;
-    //     args.Handled = true;
-    //     originalSource.DragDelta += new DragDeltaEventHandler(this.OnSplitterResized);
-    //     originalSource.DragCompleted += new DragCompletedEventHandler(this.OnSplitterDragCompleted);
-    //     if (!this.ShowResizePreview)
-    //         return;
-    //     this.currentPreviewWindow = new SplitterResizePreviewWindow();
-    //     this.currentPreviewWindow.Show((UIElement) originalSource);
-    // }
+    private void OnSplitterDragStarted(object sender, VectorEventArgs args)
+    {
+        if (!(sender is GridSplitter originalSource))
+            return;
+        args.Handled = true;
+        originalSource.DragDelta +=  this.OnSplitterResized;
+        originalSource.DragCompleted += OnSplitterDragCompleted;
+        // if (!this.ShowResizePreview)
+        //     return;
+        // this.currentPreviewWindow = new SplitterResizePreviewWindow();
+        // this.currentPreviewWindow.Show((UIElement) originalSource);
+    }
 
-    // private void OnSplitterDragCompleted(object sender, DragCompletedEventArgs args)
-    // {
-    //     if (!(sender is SplitterGrip grip))
-    //         return;
-    //     args.Handled = true;
-    //     if (this.IsShowingResizePreview)
-    //     {
-    //         this.currentPreviewWindow.Hide();
-    //         this.currentPreviewWindow = (SplitterResizePreviewWindow) null;
-    //         Point logicalPoint =
-    //             DpiAwareness.DeviceToLogicalPoint((Visual) grip, new Point(args.HorizontalChange, args.VerticalChange));
-    //         this.CommitResize(grip, logicalPoint.X, logicalPoint.Y);
-    //     }
+    private void OnSplitterDragCompleted(object sender, VectorEventArgs args)
+    {
+        if (!(sender is GridSplitter grip))
+            return;
+        args.Handled = true;
+        // if (this.IsShowingResizePreview)
+        // {
+        //     this.currentPreviewWindow.Hide();
+        //     this.currentPreviewWindow = (SplitterResizePreviewWindow) null;
+        //     Point logicalPoint =
+        //         DpiAwareness.DeviceToLogicalPoint((Visual) grip, new Point(args.HorizontalChange, args.VerticalChange));
+        //     this.CommitResize(grip, logicalPoint.X, logicalPoint.Y);
+        // }
+
+        grip.DragDelta -= this.OnSplitterResized;
+        grip.DragCompleted -= OnSplitterDragCompleted;
+    }
     //
-    //     grip.DragDelta -= new DragDeltaEventHandler(this.OnSplitterResized);
-    //     grip.DragCompleted -= new DragCompletedEventHandler(this.OnSplitterDragCompleted);
-    // }
+    private void OnSplitterResized(object sender, VectorEventArgs args)
+    {
+        if (!(sender is GridSplitter grip))
+            return;
+        args.Handled = true;
+        // if (this.IsShowingResizePreview)
+        //     this.TrackResizePreview(grip, args.HorizontalChange, args.VerticalChange);
+        // else
+            this.CommitResize(grip, args.Vector.X, args.Vector.Y);
+    }
     //
-    // private void OnSplitterResized(object sender, DragDeltaEventArgs args)
-    // {
-    //     if (!(sender is SplitterGrip grip))
-    //         return;
-    //     args.Handled = true;
-    //     if (this.IsShowingResizePreview)
-    //         this.TrackResizePreview(grip, args.HorizontalChange, args.VerticalChange);
-    //     else
-    //         this.CommitResize(grip, args.HorizontalChange, args.VerticalChange);
-    // }
-    //
-    // private void CommitResize(SplitterGrip grip, double horizontalChange, double verticalChange)
-    // {
-    //     int resizeIndex1;
-    //     int resizeIndex2;
-    //     if (!this.GetResizeIndices(grip, out int _, out resizeIndex1, out resizeIndex2))
-    //         return;
-    //     double pixelAmount = this.Orientation == Orientation.Horizontal ? horizontalChange : verticalChange;
-    //     this.ResizeChildren(resizeIndex1, resizeIndex2, pixelAmount);
-    // }
-    //
+    private void CommitResize(GridSplitter grip, double horizontalChange, double verticalChange)
+    {
+        int resizeIndex1;
+        int resizeIndex2;
+        if (!this.GetResizeIndices(grip, out int _, out resizeIndex1, out resizeIndex2))
+            return;
+        double pixelAmount = this.Orientation == Orientation.Horizontal ? horizontalChange : verticalChange;
+        this.ResizeChildren(resizeIndex1, resizeIndex2, pixelAmount);
+    }
+    
     // private void TrackResizePreview(
     //     SplitterGrip grip,
     //     double horizontalChange,
@@ -450,45 +459,45 @@ public class SplitterPanel : Panel
     //     this.currentPreviewWindow.Move((double) (int) screen.X, (double) (int) screen.Y);
     // }
 
-    // private bool GetResizeIndices(
-    //     SplitterGrip grip,
-    //     out int gripIndex,
-    //     out int resizeIndex1,
-    //     out int resizeIndex2)
-    // {
-    //     for (int index = 0; index < this.Children.Count; ++index)
-    //     {
-    //         if (this.Children[index].IsAncestorOf((DependencyObject) grip))
-    //         {
-    //             gripIndex = index;
-    //             switch (grip.ResizeBehavior)
-    //             {
-    //                 case GridResizeBehavior.CurrentAndNext:
-    //                     resizeIndex1 = index;
-    //                     resizeIndex2 = index + 1;
-    //                     break;
-    //                 case GridResizeBehavior.PreviousAndCurrent:
-    //                     resizeIndex1 = index - 1;
-    //                     resizeIndex2 = index;
-    //                     break;
-    //                 case GridResizeBehavior.PreviousAndNext:
-    //                     resizeIndex1 = index - 1;
-    //                     resizeIndex2 = index + 1;
-    //                     break;
-    //                 default:
-    //                     throw new InvalidOperationException("BasedOnAlignment is not a valid resize behavior");
-    //             }
-    //
-    //             return resizeIndex1 >= 0 && resizeIndex2 >= 0 && resizeIndex1 < this.Children.Count &&
-    //                    resizeIndex2 < this.Children.Count;
-    //         }
-    //     }
-    //
-    //     gripIndex = -1;
-    //     resizeIndex1 = -1;
-    //     resizeIndex2 = -1;
-    //     return false;
-    // }
+    private bool GetResizeIndices(
+        GridSplitter grip,
+        out int gripIndex,
+        out int resizeIndex1,
+        out int resizeIndex2)
+    {
+        for (int index = 0; index < this.Children.Count; ++index)
+        {
+            if (this.Children[index].IsVisualAncestorOf(grip))
+            {
+                gripIndex = index;
+                switch (grip.ResizeBehavior)
+                {
+                    case GridResizeBehavior.CurrentAndNext:
+                        resizeIndex1 = index;
+                        resizeIndex2 = index + 1;
+                        break;
+                    case GridResizeBehavior.PreviousAndCurrent:
+                        resizeIndex1 = index - 1;
+                        resizeIndex2 = index;
+                        break;
+                    case GridResizeBehavior.PreviousAndNext:
+                        resizeIndex1 = index - 1;
+                        resizeIndex2 = index + 1;
+                        break;
+                    default:
+                        throw new InvalidOperationException("BasedOnAlignment is not a valid resize behavior");
+                }
+    
+                return resizeIndex1 >= 0 && resizeIndex2 >= 0 && resizeIndex1 < this.Children.Count &&
+                       resizeIndex2 < this.Children.Count;
+            }
+        }
+    
+        gripIndex = -1;
+        resizeIndex1 = -1;
+        resizeIndex2 = -1;
+        return false;
+    }
 
     internal void ResizeChildren(int index1, int index2, double pixelAmount)
     {
