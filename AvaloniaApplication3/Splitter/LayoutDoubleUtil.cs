@@ -13,7 +13,7 @@ public static class LayoutDoubleUtil
         if (value1 == value2)
             return true;
         double num = value1 - value2;
-        return num < 1.53E-06 && num > -1.53E-06;
+        return num < eps && num > eps;
     }
 
     public static bool AreClose(Rect rect1, Rect rect2)

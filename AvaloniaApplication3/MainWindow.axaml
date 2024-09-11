@@ -6,17 +6,18 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="AvaloniaApplication3.MainWindow"
         Title="AvaloniaApplication3">
+    
     <avaloniaApplication3:SplitterPanel>
         <Border Background="LightCoral" avaloniaApplication3:SplitterPanel.SplitterLength="100">
             <!-- <GridSplitter Height="10" Background="Black" ResizeBehavior="PreviousAndCurrent"></GridSplitter> -->
         </Border>
-        <Border Background="LightGreen" avaloniaApplication3:SplitterPanel.SplitterLength="*">
-            <GridSplitter Height="10" Background="Black" ResizeBehavior="PreviousAndCurrent" VerticalAlignment="Top"></GridSplitter>
-        </Border>
-        <Border Background="LightSalmon" avaloniaApplication3:SplitterPanel.SplitterLength="2*">
-            <GridSplitter Height="10" Background="Black" ResizeBehavior="PreviousAndCurrent" VerticalAlignment="Top"></GridSplitter>
-        </Border>
-        <Border Background="LightBlue" avaloniaApplication3:SplitterPanel.SplitterLength="100">
+        <!-- <Border Background="LightGreen" avaloniaApplication3:SplitterPanel.SplitterLength="*"> -->
+        <!--     <GridSplitter Height="10" Background="Black" ResizeBehavior="PreviousAndCurrent" VerticalAlignment="Top"></GridSplitter> -->
+        <!-- </Border> -->
+        <!-- <Border Background="LightSalmon" avaloniaApplication3:SplitterPanel.SplitterLength="2*"> -->
+        <!--     <GridSplitter Height="10" Background="Black" ResizeBehavior="PreviousAndCurrent" VerticalAlignment="Top"></GridSplitter> -->
+        <!-- </Border> -->
+        <Border Background="LightBlue" avaloniaApplication3:SplitterPanel.SplitterLength="200">
             <GridSplitter Height="10" Background="Black" ResizeBehavior="PreviousAndCurrent" VerticalAlignment="Top"></GridSplitter>
         </Border>
     </avaloniaApplication3:SplitterPanel>

@@ -9,19 +9,19 @@ public class SplitterMeasureData
 {
     public SplitterMeasureData(Control element)
     {
-        this.Element = element;
-        this.AttachedLength = SplitterPanel.GetSplitterLength(element);
+        Element = element;
+        AttachedLength = SplitterPanel.GetSplitterLength(element);
     }
 
     public static IList<SplitterMeasureData> FromElements(IList elements)
     {
         List<SplitterMeasureData> splitterMeasureDataList = new List<SplitterMeasureData>(elements.Count);
-        foreach (Control element in (IEnumerable) elements)
+        foreach (Control element in elements)
         {
             if (element != null)
                 splitterMeasureDataList.Add(new SplitterMeasureData(element));
         }
-        return (IList<SplitterMeasureData>) splitterMeasureDataList;
+        return splitterMeasureDataList;
     }
 
     public Control Element { get; private set; }

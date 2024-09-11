@@ -1,8 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using Avalonia;
-using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
@@ -59,7 +57,7 @@ public class SplitterPanel : Panel
         Thumb.DragStartedEvent.Raised.Subscribe(new AnonymousObserver<(object, RoutedEventArgs)>(x =>
         {
             _ = x;
-            this.OnSplitterDragStarted(x.Item1, (VectorEventArgs)x.Item2);
+            OnSplitterDragStarted(x.Item1, (VectorEventArgs)x.Item2);
         }));
         // this.AddHandler(Thumb.DragStartedEvent, (Delegate) new DragStartedEventHandler(this.OnSplitterDragStarted));
         // AutomationProperties.SetAutomationId((DependencyObject) this, nameof (SplitterPanel));
@@ -69,48 +67,48 @@ public class SplitterPanel : Panel
 
     public static double GetActualSplitterLength(AvaloniaObject element)
     {
-        return (double) element.GetValue(SplitterPanel.ActualSplitterLengthProperty);
+        return element.GetValue(ActualSplitterLengthProperty);
     }
 
     protected static void SetActualSplitterLength(AvaloniaObject element, double value)
     {
-        element.SetValue(SplitterPanel.ActualSplitterLengthProperty, (object) value);
+        element.SetValue(ActualSplitterLengthProperty, (object) value);
     }
 
     public static int GetIndex(AvaloniaObject element)
     {
-        return (int) element.GetValue(SplitterPanel.IndexProperty);
+        return element.GetValue(IndexProperty);
     }
 
     public static bool GetIsFirst(AvaloniaObject element)
     {
-        return (bool) element.GetValue(SplitterPanel.IsFirstProperty);
+        return element.GetValue(IsFirstProperty);
     }
 
     protected static void SetIsFirst(AvaloniaObject element, bool value)
     {
-        element.SetValue(SplitterPanel.IsFirstProperty, value);
+        element.SetValue(IsFirstProperty, value);
     }
 
     public static bool GetIsLast(AvaloniaObject element)
     {
-        return (bool) element.GetValue(SplitterPanel.IsLastProperty);
+        return element.GetValue(IsLastProperty);
     }
 
     protected static void SetIsLast(AvaloniaObject element, bool value)
     {
-        element.SetValue(SplitterPanel.IsLastProperty, value);
+        element.SetValue(IsLastProperty, value);
     }
 
     protected static void SetIndex(AvaloniaObject element, int value)
     {
-        element.SetValue(SplitterPanel.IndexProperty, (object) value);
+        element.SetValue(IndexProperty, (object) value);
     }
 
     public static SplitterLength GetSplitterLength(AvaloniaObject element)
     {
         return element != null
-            ? (SplitterLength) element.GetValue(SplitterPanel.SplitterLengthProperty)
+            ? element.GetValue(SplitterLengthProperty)
             : throw new ArgumentNullException(nameof(element));
     }
 
@@ -118,13 +116,13 @@ public class SplitterPanel : Panel
     {
         if (element == null)
             throw new ArgumentNullException(nameof(element));
-        element.SetValue(SplitterPanel.SplitterLengthProperty, (object) value);
+        element.SetValue(SplitterLengthProperty, (object) value);
     }
 
     public static double GetMinimumLength(AvaloniaObject element)
     {
         return element != null
-            ? (double) element.GetValue(SplitterPanel.MinimumLengthProperty)
+            ? element.GetValue(MinimumLengthProperty)
             : throw new ArgumentNullException(nameof(element));
     }
 
@@ -132,13 +130,13 @@ public class SplitterPanel : Panel
     {
         if (element == null)
             throw new ArgumentNullException(nameof(element));
-        element.SetValue(SplitterPanel.MinimumLengthProperty, (object) value);
+        element.SetValue(MinimumLengthProperty, (object) value);
     }
 
     public static double GetMaximumLength(AvaloniaObject element)
     {
         return element != null
-            ? (double) element.GetValue(SplitterPanel.MaximumLengthProperty)
+            ? element.GetValue(MaximumLengthProperty)
             : throw new ArgumentNullException(nameof(element));
     }
 
@@ -146,13 +144,13 @@ public class SplitterPanel : Panel
     {
         if (element == null)
             throw new ArgumentNullException(nameof(element));
-        element.SetValue(SplitterPanel.MaximumLengthProperty, (object) value);
+        element.SetValue(MaximumLengthProperty, (object) value);
     }
 
     public Orientation Orientation
     {
-        get => (Orientation) this.GetValue(SplitterPanel.OrientationProperty);
-        set => this.SetValue(SplitterPanel.OrientationProperty, (object) value);
+        get => GetValue(OrientationProperty);
+        set => SetValue(OrientationProperty, (object) value);
     }
 
     // public bool ShowResizePreview
@@ -163,32 +161,25 @@ public class SplitterPanel : Panel
 
     private void UpdateIndices()
     {
-        int count = this.Children.Count;
+        int count = Children.Count;
         int num = count - 1;
         for (int index = 0; index < count; ++index)
         {
-            Visual internalChild = this.Children[index];
-            if (internalChild != null)
-            {
-                SplitterPanel.SetIndex(internalChild, index);
-                SplitterPanel.SetIsFirst(internalChild, index == 0);
-                SplitterPanel.SetIsLast(internalChild, index == num);
-            }
+            Visual internalChild = Children[index];
+            SetIndex(internalChild, index);
+            SetIsFirst(internalChild, index == 0);
+            SetIsLast(internalChild, index == num);
         }
     }
 
     protected override Size MeasureOverride(Size availableSize)
     {
-        this.UpdateIndices();
-        return SplitterPanel.Measure(availableSize, this.Orientation,
-            (IEnumerable<SplitterMeasureData>) SplitterMeasureData.FromElements((IList) this.Children), true);
+        UpdateIndices();
+        return Measure(availableSize, Orientation,
+            SplitterMeasureData.FromElements(Children), true);
     }
 
-    private static Size MeasureNonreal(
-        Size availableSize,
-        Orientation orientation,
-        IEnumerable<SplitterMeasureData> measureData,
-        bool remeasureElements)
+    private static Size MeasureNonreal(Size availableSize, Orientation orientation, IEnumerable<SplitterMeasureData> measureData, bool remeasureElements)
     {
         double num1 = 0.0;
         double num2 = 0.0;
@@ -240,11 +231,11 @@ public class SplitterPanel : Panel
         double minStretch = 0.0;
         if (orientation == Orientation.Horizontal && LayoutDoubleUtil.IsNonreal(availableSize.Width) ||
             orientation == Orientation.Vertical && LayoutDoubleUtil.IsNonreal(availableSize.Height))
-            return SplitterPanel.MeasureNonreal(availableSize, orientation, measureData, remeasureElements);
+            return MeasureNonreal(availableSize, orientation, measureData, remeasureElements);
         foreach (SplitterMeasureData splitterMeasureData in measureData)
         {
             SplitterLength attachedLength = splitterMeasureData.AttachedLength;
-            double minimumLength = SplitterPanel.GetMinimumLength(splitterMeasureData.Element);
+            double minimumLength = GetMinimumLength(splitterMeasureData.Element);
             if (attachedLength.IsStretch)
             {
                 valueStretch += attachedLength.Value;
@@ -268,17 +259,13 @@ public class SplitterPanel : Panel
         double remainsForStretch = remainsForFill == 0.0 ? availableLength : valueStretch;
         if (minTotal <= availableLength)
         {
-            bool flag = false;
             foreach (SplitterMeasureData splitterMeasureData in measureData)
             {
                 SplitterLength attachedLength = splitterMeasureData.AttachedLength;
-                double maximumLength = SplitterPanel.GetMaximumLength(splitterMeasureData.Element);
-                if (attachedLength.IsStretch &&
-                    (valueStretch == 0.0 ? 0.0 : attachedLength.Value / valueStretch * remainsForStretch) >
-                    maximumLength)
+                double maximumLength = GetMaximumLength(splitterMeasureData.Element);
+                if (attachedLength.IsStretch && (valueStretch == 0.0 ? 0.0 : attachedLength.Value / valueStretch * remainsForStretch) > maximumLength)
                 {
                     splitterMeasureData.IsMaximumReached = true;
-                    flag = true;
                     if (valueStretch == attachedLength.Value)
                     {
                         valueStretch = maximumLength;
@@ -305,7 +292,7 @@ public class SplitterPanel : Panel
             foreach (SplitterMeasureData splitterMeasureData in measureData)
             {
                 SplitterLength attachedLength = splitterMeasureData.AttachedLength;
-                double minimumLength = SplitterPanel.GetMinimumLength(splitterMeasureData.Element);
+                double minimumLength = GetMinimumLength(splitterMeasureData.Element);
                 if (attachedLength.IsFill)
                 {
                     if ((valueFill == 0.0 ? 0.0 : attachedLength.Value / valueFill * remainsForFill) < minimumLength)
@@ -331,12 +318,12 @@ public class SplitterPanel : Panel
         {
             SplitterLength attachedLength = splitterMeasureData.AttachedLength;
             double num9 = splitterMeasureData.IsMinimumReached
-                ? SplitterPanel.GetMinimumLength(splitterMeasureData.Element)
+                ? GetMinimumLength(splitterMeasureData.Element)
                 : (!attachedLength.IsFill
                     ? (valueStretch == 0.0 ? 0.0 : attachedLength.Value / valueStretch * remainsForStretch)
                     : (valueFill == 0.0 ? 0.0 : attachedLength.Value / valueFill * remainsForFill));
             if (remeasureElements)
-                SplitterPanel.SetActualSplitterLength(splitterMeasureData.Element, num9);
+                SetActualSplitterLength(splitterMeasureData.Element, num9);
             if (orientation == Orientation.Horizontal)
             {
                 availableSize1 = availableSize1.WithWidth(num9);
@@ -361,12 +348,12 @@ public class SplitterPanel : Panel
     protected override Size ArrangeOverride(Size finalSize)
     {
         Rect finalRect = new Rect(0.0, 0.0, finalSize.Width, finalSize.Height);
-        foreach (Control internalChild in this.Children)
+        foreach (Control internalChild in Children)
         {
             if (internalChild != null)
             {
-                double actualSplitterLength = SplitterPanel.GetActualSplitterLength(internalChild);
-                if (this.Orientation == Orientation.Horizontal)
+                double actualSplitterLength = GetActualSplitterLength(internalChild);
+                if (Orientation == Orientation.Horizontal)
                 {
                     finalRect = finalRect.WithWidth(actualSplitterLength);
                     internalChild.Arrange(finalRect);
@@ -384,12 +371,12 @@ public class SplitterPanel : Panel
         return finalSize;
     }
 
-    private void OnSplitterDragStarted(object sender, VectorEventArgs args)
+    private void OnSplitterDragStarted(object? sender, VectorEventArgs args)
     {
         if (!(sender is GridSplitter originalSource))
             return;
         args.Handled = true;
-        originalSource.DragDelta +=  this.OnSplitterResized;
+        originalSource.DragDelta +=  OnSplitterResized;
         originalSource.DragCompleted += OnSplitterDragCompleted;
         // if (!this.ShowResizePreview)
         //     return;
@@ -397,7 +384,7 @@ public class SplitterPanel : Panel
         // this.currentPreviewWindow.Show((UIElement) originalSource);
     }
 
-    private void OnSplitterDragCompleted(object sender, VectorEventArgs args)
+    private void OnSplitterDragCompleted(object? sender, VectorEventArgs args)
     {
         if (!(sender is GridSplitter grip))
             return;
@@ -411,11 +398,11 @@ public class SplitterPanel : Panel
         //     this.CommitResize(grip, logicalPoint.X, logicalPoint.Y);
         // }
 
-        grip.DragDelta -= this.OnSplitterResized;
+        grip.DragDelta -= OnSplitterResized;
         grip.DragCompleted -= OnSplitterDragCompleted;
     }
     //
-    private void OnSplitterResized(object sender, VectorEventArgs args)
+    private void OnSplitterResized(object? sender, VectorEventArgs args)
     {
         if (!(sender is GridSplitter grip))
             return;
@@ -423,17 +410,15 @@ public class SplitterPanel : Panel
         // if (this.IsShowingResizePreview)
         //     this.TrackResizePreview(grip, args.HorizontalChange, args.VerticalChange);
         // else
-            this.CommitResize(grip, args.Vector.X, args.Vector.Y);
+            CommitResize(grip, args.Vector.X, args.Vector.Y);
     }
     //
     private void CommitResize(GridSplitter grip, double horizontalChange, double verticalChange)
     {
-        int resizeIndex1;
-        int resizeIndex2;
-        if (!this.GetResizeIndices(grip, out int _, out resizeIndex1, out resizeIndex2))
+        if (!GetResizeIndices(grip, out int _, out var resizeIndex1, out var resizeIndex2))
             return;
-        double pixelAmount = this.Orientation == Orientation.Horizontal ? horizontalChange : verticalChange;
-        this.ResizeChildren(resizeIndex1, resizeIndex2, pixelAmount);
+        double pixelAmount = Orientation == Orientation.Horizontal ? horizontalChange : verticalChange;
+        ResizeChildren(resizeIndex1, resizeIndex2, pixelAmount);
     }
     
     // private void TrackResizePreview(
@@ -459,15 +444,11 @@ public class SplitterPanel : Panel
     //     this.currentPreviewWindow.Move((double) (int) screen.X, (double) (int) screen.Y);
     // }
 
-    private bool GetResizeIndices(
-        GridSplitter grip,
-        out int gripIndex,
-        out int resizeIndex1,
-        out int resizeIndex2)
+    private bool GetResizeIndices(GridSplitter grip, out int gripIndex, out int resizeIndex1, out int resizeIndex2)
     {
-        for (int index = 0; index < this.Children.Count; ++index)
+        for (int index = 0; index < Children.Count; ++index)
         {
-            if (this.Children[index].IsVisualAncestorOf(grip))
+            if (Children[index].IsVisualAncestorOf(grip))
             {
                 gripIndex = index;
                 switch (grip.ResizeBehavior)
@@ -488,8 +469,8 @@ public class SplitterPanel : Panel
                         throw new InvalidOperationException("BasedOnAlignment is not a valid resize behavior");
                 }
     
-                return resizeIndex1 >= 0 && resizeIndex2 >= 0 && resizeIndex1 < this.Children.Count &&
-                       resizeIndex2 < this.Children.Count;
+                return resizeIndex1 >= 0 && resizeIndex2 >= 0 && resizeIndex1 < Children.Count &&
+                       resizeIndex2 < Children.Count;
             }
         }
     
@@ -501,13 +482,13 @@ public class SplitterPanel : Panel
 
     internal void ResizeChildren(int index1, int index2, double pixelAmount)
     {
-        SplitterMeasureData child1 = new SplitterMeasureData(this.Children[index1]);
-        SplitterMeasureData child2 = new SplitterMeasureData(this.Children[index2]);
-        if (!this.ResizeChildrenCore(child1, child2, pixelAmount))
+        SplitterMeasureData child1 = new SplitterMeasureData(Children[index1]);
+        SplitterMeasureData child2 = new SplitterMeasureData(Children[index2]);
+        if (!ResizeChildrenCore(child1, child2, pixelAmount))
             return;
-        SplitterPanel.SetSplitterLength(child1.Element, child1.AttachedLength);
-        SplitterPanel.SetSplitterLength(child2.Element, child2.AttachedLength);
-        this.InvalidateMeasure();
+        SetSplitterLength(child1.Element, child1.AttachedLength);
+        SetSplitterLength(child2.Element, child2.AttachedLength);
+        InvalidateMeasure();
     }
 
     private bool ResizeChildrenCore(
@@ -519,14 +500,14 @@ public class SplitterPanel : Panel
         Visual element2 = child2.Element;
         SplitterLength attachedLength1 = child1.AttachedLength;
         SplitterLength attachedLength2 = child2.AttachedLength;
-        double actualSplitterLength1 = SplitterPanel.GetActualSplitterLength(element1);
-        double actualSplitterLength2 = SplitterPanel.GetActualSplitterLength(element2);
+        double actualSplitterLength1 = GetActualSplitterLength(element1);
+        double actualSplitterLength2 = GetActualSplitterLength(element2);
         double num1 = Math.Max(0.0,
             Math.Min(actualSplitterLength1 + actualSplitterLength2, actualSplitterLength1 + pixelAmount));
         double num2 = Math.Max(0.0,
             Math.Min(actualSplitterLength1 + actualSplitterLength2, actualSplitterLength2 - pixelAmount));
-        double minimumLength1 = SplitterPanel.GetMinimumLength(element1);
-        double minimumLength2 = SplitterPanel.GetMinimumLength(element2);
+        double minimumLength1 = GetMinimumLength(element1);
+        double minimumLength2 = GetMinimumLength(element2);
         if (minimumLength1 + minimumLength2 > num1 + num2)
             return false;
         if (num1 < minimumLength1)
